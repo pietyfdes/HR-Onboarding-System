@@ -498,18 +498,111 @@ def checklist(items: list, prefix: str) -> None:
 # UI
 # --------------------------------------------------------------------------
 
+CSS = """
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+html, body, [class*="css"], .stApp { font-family: 'Inter', sans-serif; }
+.stApp { background: linear-gradient(180deg, #f5f7ff 0%, #ffffff 40%); }
+.block-container { max-width: 1100px; padding-top: 1.5rem; }
+#MainMenu, footer, header { visibility: hidden; }
+
+.hero {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 55%, #db2777 100%);
+    border-radius: 22px; padding: 2.4rem 2.6rem; color: #fff;
+    box-shadow: 0 18px 40px rgba(79, 70, 229, .28); margin-bottom: 1.6rem;
+}
+.hero h1 { color: #fff; font-size: 2.4rem; font-weight: 800; margin: 0 0 .4rem 0; padding: 0; }
+.hero p { color: rgba(255,255,255,.88); font-size: 1.05rem; margin: 0; }
+
+.section-title {
+    display: flex; align-items: center; gap: .7rem;
+    font-size: 1.45rem; font-weight: 700; color: #1e1b4b;
+    margin: 2.2rem 0 .9rem 0;
+}
+.section-title .num {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #fff;
+    width: 2.1rem; height: 2.1rem; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 1rem; font-weight: 700;
+}
+
+.card {
+    background: #fff; border: 1px solid #e5e7f5; border-radius: 16px;
+    padding: 1.2rem 1.4rem; box-shadow: 0 4px 14px rgba(30, 27, 75, .06);
+    margin-bottom: .9rem;
+}
+.card h4 { margin: 0 0 .6rem 0; color: #4338ca; font-size: 1.02rem; }
+.card ul { margin: 0; padding-left: 1.2rem; color: #374151; }
+.card li { margin-bottom: .3rem; }
+
+.email {
+    background: #fff; border: 1px solid #e5e7f5; border-left: 6px solid #7c3aed;
+    border-radius: 14px; padding: 1.6rem 1.8rem; white-space: pre-wrap;
+    color: #1f2937; line-height: 1.65; box-shadow: 0 4px 14px rgba(30, 27, 75, .06);
+}
+
+.chips { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .4rem; }
+.chip {
+    background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.35);
+    padding: .3rem .85rem; border-radius: 999px; font-size: .88rem; font-weight: 600;
+}
+
+div[data-testid="stForm"] {
+    background: #fff; border: 1px solid #e5e7f5; border-radius: 18px;
+    padding: 1.6rem; box-shadow: 0 8px 24px rgba(30, 27, 75, .08);
+}
+.stButton > button, .stFormSubmitButton > button, .stDownloadButton > button {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #fff;
+    border: none; border-radius: 12px; font-weight: 600; padding: .6rem 1.4rem;
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+.stButton > button:hover, .stFormSubmitButton > button:hover, .stDownloadButton > button:hover {
+    transform: translateY(-1px); box-shadow: 0 8px 18px rgba(79, 70, 229, .35); color: #fff;
+}
+div[data-testid="stExpander"] {
+    background: #fff; border: 1px solid #e5e7f5 !important; border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(30, 27, 75, .04);
+}
+</style>
+"""
+
+
+def section(number: int, icon: str, title: str) -> None:
+    st.markdown(
+        f'<div class="section-title"><span class="num">{number}</span>{icon} {title}</div>',
+        unsafe_allow_html=True,
+    )
+
+
+def card(title: str, items: list) -> None:
+    lis = "".join(f"<li>{i}</li>" for i in items)
+    st.markdown(f'<div class="card"><h4>{title}</h4><ul>{lis}</ul></div>', unsafe_allow_html=True)
+
 
 def main() -> None:
-    st.set_page_config(page_title="Employee Onboarding System", page_icon="🧑‍💼", layout="wide")
-    st.title("🧑‍💼 AI-Powered Employee Onboarding System")
-    st.caption("Enter the new hire's details to generate a complete onboarding package.")
+    st.set_page_config(page_title="Employee Onboarding System", page_icon="🚀", layout="wide")
+    st.markdown(CSS, unsafe_allow_html=True)
+
+    st.markdown(
+        """
+        <div class="hero">
+            <h1>🚀 AI-Powered Employee Onboarding</h1>
+            <p>Enter a new hire's details and instantly get a welcome email, 7-day plan,
+            checklists, FAQs and training resources.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     with st.form("onboarding_form"):
-        name = st.text_input("Employee Name", placeholder="e.g., Jane Doe")
-        role = st.text_input("Role", placeholder="e.g., Senior Software Engineer")
-        department = st.selectbox("Department", list(DEPARTMENT_IT_ACCESS.keys()))
-        start = st.date_input("Start Date", value=date.today())
-        submitted = st.form_submit_button("Generate Onboarding Package")
+        c1, c2 = st.columns(2)
+        with c1:
+            name = st.text_input("👤 Employee Name", placeholder="e.g., Jane Doe")
+            department = st.selectbox("🏢 Department", list(DEPARTMENT_IT_ACCESS.keys()))
+        with c2:
+            role = st.text_input("💼 Role", placeholder="e.g., Senior Software Engineer")
+            start = st.date_input("📅 Start Date", value=date.today())
+        submitted = st.form_submit_button("✨ Generate Onboarding Package", use_container_width=True)
 
     if submitted:
         if not name.strip() or not role.strip():
@@ -519,54 +612,79 @@ def main() -> None:
             st.session_state["package"] = (name.strip(), role.strip(), department, start)
 
     if "package" not in st.session_state:
+        st.info("👆 Fill in the form above to generate the onboarding package.")
         return
 
     name, role, department, start = st.session_state["package"]
-    st.success(f"Onboarding package for **{name}** - {role}, {department}")
+    level = get_level(role)
 
-    st.header("1. Welcome Email")
-    email = generate_welcome_email(name, role, department, start)
-    st.code(email, language=None)
-
-    st.header("2. 7-Day Onboarding Plan")
-    for entry in generate_onboarding_plan(name, role, department):
-        with st.expander(entry["day"], expanded=False):
-            for task in entry["tasks"]:
-                st.markdown(f"- {task}")
-
-    st.header("3. Required Documents Checklist")
-    checklist(generate_document_checklist(role, department), "doc")
-
-    st.header("4. IT Access Checklist")
-    common, dept_items = generate_it_checklist(role, department)
-    col1, col2 = st.columns(2)
-    with col1:
-        st.subheader("Standard access (all employees)")
-        checklist(common, "it_common")
-    with col2:
-        st.subheader(f"{department} access")
-        if dept_items:
-            checklist(dept_items, "it_dept")
-        else:
-            st.info("No department-specific access defined.")
-
-    st.header("5. FAQs for New Employees")
-    for question, answer in generate_faqs(role):
-        with st.expander(question):
-            st.write(answer)
-
-    st.header("6. Training Resources")
-    for category, courses in generate_training(role, department).items():
-        if courses:
-            st.subheader(category)
-            for course in courses:
-                st.markdown(f"- {course}")
-
-    st.download_button(
-        "Download Welcome Email (.txt)",
-        data=email,
-        file_name=f"welcome_email_{name.replace(' ', '_')}.txt",
+    st.markdown(
+        f"""
+        <div class="hero" style="padding:1.4rem 2rem; margin-top:1.4rem;">
+            <h1 style="font-size:1.7rem;">Onboarding package for {name}</h1>
+            <div class="chips">
+                <span class="chip">💼 {role}</span>
+                <span class="chip">🏢 {department}</span>
+                <span class="chip">🎯 {level.title()} level</span>
+                <span class="chip">📅 Starts {start.strftime('%b %d, %Y')}</span>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
+
+    tabs = st.tabs(["✉️ Email", "🗓️ 7-Day Plan", "📄 Documents", "🔐 IT Access", "❓ FAQs", "🎓 Training"])
+
+    with tabs[0]:
+        section(1, "✉️", "Welcome Email")
+        email = generate_welcome_email(name, role, department, start)
+        st.markdown(f'<div class="email">{email}</div>', unsafe_allow_html=True)
+        st.write("")
+        st.download_button(
+            "⬇️ Download Welcome Email (.txt)",
+            data=email,
+            file_name=f"welcome_email_{name.replace(' ', '_')}.txt",
+        )
+
+    with tabs[1]:
+        section(2, "🗓️", "7-Day Onboarding Plan")
+        for idx, entry in enumerate(generate_onboarding_plan(name, role, department)):
+            with st.expander(entry["day"], expanded=(idx == 0)):
+                for task in entry["tasks"]:
+                    st.markdown(f"- {task}")
+
+    with tabs[2]:
+        section(3, "📄", "Required Documents Checklist")
+        checklist(generate_document_checklist(role, department), "doc")
+
+    with tabs[3]:
+        section(4, "🔐", "IT Access Checklist")
+        common, dept_items = generate_it_checklist(role, department)
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("##### 🌐 Standard access (all employees)")
+            checklist(common, "it_common")
+        with col2:
+            st.markdown(f"##### 🏢 {department} access")
+            if dept_items:
+                checklist(dept_items, "it_dept")
+            else:
+                st.info("No department-specific access defined.")
+
+    with tabs[4]:
+        section(5, "❓", "FAQs for New Employees")
+        for question, answer in generate_faqs(role):
+            with st.expander(question):
+                st.write(answer)
+
+    with tabs[5]:
+        section(6, "🎓", "Training Resources")
+        icons = ["🏛️", "🏢", "💼", "📈"]
+        cols = st.columns(2)
+        shown = [(c, v) for c, v in generate_training(role, department).items() if v]
+        for i, (category, courses) in enumerate(shown):
+            with cols[i % 2]:
+                card(f"{icons[i % len(icons)]} {category}", courses)
 
 
 if __name__ == "__main__":
