@@ -1,5 +1,7 @@
 """AI-Powered Employee Onboarding System (rule-based, no external APIs)."""
 
+import base64
+import html
 from datetime import date
 
 import streamlit as st
@@ -537,9 +539,18 @@ html, body, [class*="css"], .stApp { font-family: 'Inter', sans-serif; }
 
 .email {
     background: #fff; border: 1px solid #e5e7f5; border-left: 6px solid #7c3aed;
-    border-radius: 14px; padding: 1.6rem 1.8rem; white-space: pre-wrap;
-    color: #1f2937; line-height: 1.65; box-shadow: 0 4px 14px rgba(30, 27, 75, .06);
+    border-radius: 14px; padding: 1.4rem 1.8rem;
+    color: #1f2937; line-height: 1.55; box-shadow: 0 4px 14px rgba(30, 27, 75, .06);
 }
+.email p { margin: 0 0 .7rem 0; }
+.email ul { margin: 0 0 .7rem 0; padding-left: 1.3rem; }
+.email li { margin-bottom: .15rem; }
+.email .subject { font-weight: 700; color: #312e81; padding-bottom: .7rem;
+    margin-bottom: .9rem; border-bottom: 1px solid #e5e7f5; }
+.email .head { display: flex; align-items: center; gap: 1rem; }
+.email .head .subject { flex: 1; }
+.email img.photo { width: 84px; height: 84px; border-radius: 50%; object-fit: cover;
+    border: 3px solid #7c3aed; box-shadow: 0 4px 12px rgba(124, 58, 237, .3); }
 
 .chips { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .4rem; }
 .chip {
@@ -565,6 +576,26 @@ div[data-testid="stExpander"] {
 }
 </style>
 """
+
+
+def email_to_html(email: str, photo: bytes = None, mime: str = "image/png") -> str:
+    """Render the plain-text email as compact HTML (optionally with a photo)."""
+    blocks = [b for b in email.strip().split("\n\n") if b.strip()]
+    subject = html.escape(blocks[0].replace("Subject:", "", 1).strip())
+    img = ""
+    if photo:
+        b64 = base64.b64encode(photo).decode()
+        img = f'<img class="photo" src="data:{mime};base64,{b64}" alt="Employee photo">'
+    parts = [f'<div class="head">{img}<div class="subject">Subject: {subject}</div></div>']
+    for block in blocks[1:]:
+        lines = [l for l in block.split("\n") if l.strip()]
+        bullets = [l.strip()[2:] for l in lines if l.strip().startswith("- ")]
+        intro = [l for l in lines if not l.strip().startswith("- ")]
+        if intro:
+            parts.append("<p>" + "<br>".join(html.escape(l.strip()) for l in intro) + "</p>")
+        if bullets:
+            parts.append("<ul>" + "".join(f"<li>{html.escape(b)}</li>" for b in bullets) + "</ul>")
+    return '<div class="email">' + "".join(parts) + "</div>"
 
 
 def section(number: int, icon: str, title: str) -> None:
@@ -602,6 +633,10 @@ def main() -> None:
         with c2:
             role = st.text_input("💼 Role", placeholder="e.g., Senior Software Engineer")
             start = st.date_input("📅 Start Date", value=date.today())
+        photo_file = st.file_uploader(
+            "📸 Employee Photo (optional - shown in the welcome email)",
+            type=["png", "jpg", "jpeg"],
+        )
         submitted = st.form_submit_button("✨ Generate Onboarding Package", use_container_width=True)
 
     if submitted:
@@ -609,13 +644,14 @@ def main() -> None:
             st.error("Please enter both the employee name and role.")
             st.session_state.pop("package", None)
         else:
-            st.session_state["package"] = (name.strip(), role.strip(), department, start)
+            photo = (photo_file.getvalue(), photo_file.type) if photo_file else None
+            st.session_state["package"] = (name.strip(), role.strip(), department, start, photo)
 
     if "package" not in st.session_state:
         st.info("👆 Fill in the form above to generate the onboarding package.")
         return
 
-    name, role, department, start = st.session_state["package"]
+    name, role, department, start, photo = st.session_state["package"]
     level = get_level(role)
 
     st.markdown(
@@ -638,12 +674,18 @@ def main() -> None:
     with tabs[0]:
         section(1, "✉️", "Welcome Email")
         email = generate_welcome_email(name, role, department, start)
-        st.markdown(f'<div class="email">{email}</div>', unsafe_allow_html=True)
+        photo_bytes, mime = photo if photo else (None, "image/png")
+        email_html = email_to_html(email, photo_bytes, mime)
+        st.markdown(email_html, unsafe_allow_html=True)
         st.write("")
-        st.download_button(
-            "⬇️ Download Welcome Email (.txt)",
-            data=email,
-            file_name=f"welcome_email_{name.replace(' ', '_')}.txt",
+        d1, d2, _ = st.columns([1, 1, 2])
+        safe = name.replace(" ", "_")
+        d1.download_button("⬇️ Email (.txt)", data=email, file_name=f"welcome_email_{safe}.txt")
+        d2.download_button(
+            "⬇️ Email with photo (.html)",
+            data=f"<html><body style='font-family:Arial;max-width:700px;margin:auto'>{email_html}</body></html>",
+            file_name=f"welcome_email_{safe}.html",
+            mime="text/html",
         )
 
     with tabs[1]:
