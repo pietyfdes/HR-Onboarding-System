@@ -500,80 +500,59 @@ def checklist(items: list, prefix: str) -> None:
 # UI
 # --------------------------------------------------------------------------
 
+ROLES = [
+    "Software Engineer", "Senior Software Engineer", "DevOps Engineer", "QA Engineer",
+    "Data Scientist", "Data Analyst", "Power BI Developer", "UX Designer",
+    "Product Manager", "Project Manager", "Marketing Specialist", "Sales Executive",
+    "Account Manager", "HR Specialist", "Recruiter", "Accountant", "Financial Analyst",
+    "Customer Support Agent", "Operations Manager", "Team Lead", "Director", "Intern",
+    "Other (type below)",
+]
+
+FEATURES = [
+    "Welcome email generation",
+    "7-day onboarding plan",
+    "Document checklist",
+    "IT access management",
+    "FAQs for new employees",
+    "Role-based training resources",
+]
+
 CSS = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-html, body, [class*="css"], .stApp { font-family: 'Inter', sans-serif; }
-.stApp { background: linear-gradient(180deg, #f5f7ff 0%, #ffffff 40%); }
-.block-container { max-width: 1100px; padding-top: 1.5rem; }
-#MainMenu, footer, header { visibility: hidden; }
-
-.hero {
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 55%, #db2777 100%);
-    border-radius: 22px; padding: 2.4rem 2.6rem; color: #fff;
-    box-shadow: 0 18px 40px rgba(79, 70, 229, .28); margin-bottom: 1.6rem;
-}
-.hero h1 { color: #fff; font-size: 2.4rem; font-weight: 800; margin: 0 0 .4rem 0; padding: 0; }
-.hero p { color: rgba(255,255,255,.88); font-size: 1.05rem; margin: 0; }
-
+.block-container { max-width: 1100px; }
 .section-title {
     display: flex; align-items: center; gap: .7rem;
-    font-size: 1.45rem; font-weight: 700; color: #1e1b4b;
-    margin: 2.2rem 0 .9rem 0;
+    font-size: 1.5rem; font-weight: 700; margin: 1.6rem 0 .9rem 0;
 }
 .section-title .num {
-    background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #fff;
-    width: 2.1rem; height: 2.1rem; border-radius: 50%;
+    background: #ff4b4b; color: #fff; width: 2rem; height: 2rem; border-radius: 50%;
     display: inline-flex; align-items: center; justify-content: center;
-    font-size: 1rem; font-weight: 700;
+    font-size: .95rem; font-weight: 700;
 }
-
 .card {
-    background: #fff; border: 1px solid #e5e7f5; border-radius: 16px;
-    padding: 1.2rem 1.4rem; box-shadow: 0 4px 14px rgba(30, 27, 75, .06);
-    margin-bottom: .9rem;
+    background: #1a1c24; border: 1px solid #2d303c; border-radius: 12px;
+    padding: 1.1rem 1.3rem; margin-bottom: .9rem;
 }
-.card h4 { margin: 0 0 .6rem 0; color: #4338ca; font-size: 1.02rem; }
-.card ul { margin: 0; padding-left: 1.2rem; color: #374151; }
+.card h4 { margin: 0 0 .6rem 0; color: #ff6b6b; font-size: 1.02rem; }
+.card ul { margin: 0; padding-left: 1.2rem; }
 .card li { margin-bottom: .3rem; }
-
 .email {
-    background: #fff; border: 1px solid #e5e7f5; border-left: 6px solid #7c3aed;
-    border-radius: 14px; padding: 1.4rem 1.8rem;
-    color: #1f2937; line-height: 1.55; box-shadow: 0 4px 14px rgba(30, 27, 75, .06);
+    background: #1a1c24; border: 1px solid #2d303c; border-left: 5px solid #ff4b4b;
+    border-radius: 12px; padding: 1.4rem 1.8rem; line-height: 1.55;
 }
 .email p { margin: 0 0 .7rem 0; }
 .email ul { margin: 0 0 .7rem 0; padding-left: 1.3rem; }
 .email li { margin-bottom: .15rem; }
-.email .subject { font-weight: 700; color: #312e81; padding-bottom: .7rem;
-    margin-bottom: .9rem; border-bottom: 1px solid #e5e7f5; }
+.email .subject { font-weight: 700; padding-bottom: .7rem; margin-bottom: .9rem;
+    border-bottom: 1px solid #2d303c; }
 .email .head { display: flex; align-items: center; gap: 1rem; }
 .email .head .subject { flex: 1; }
 .email img.photo { width: 84px; height: 84px; border-radius: 50%; object-fit: cover;
-    border: 3px solid #7c3aed; box-shadow: 0 4px 12px rgba(124, 58, 237, .3); }
-
-.chips { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .4rem; }
-.chip {
-    background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.35);
-    padding: .3rem .85rem; border-radius: 999px; font-size: .88rem; font-weight: 600;
-}
-
-div[data-testid="stForm"] {
-    background: #fff; border: 1px solid #e5e7f5; border-radius: 18px;
-    padding: 1.6rem; box-shadow: 0 8px 24px rgba(30, 27, 75, .08);
-}
-.stButton > button, .stFormSubmitButton > button, .stDownloadButton > button {
-    background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #fff;
-    border: none; border-radius: 12px; font-weight: 600; padding: .6rem 1.4rem;
-    transition: transform .15s ease, box-shadow .15s ease;
-}
-.stButton > button:hover, .stFormSubmitButton > button:hover, .stDownloadButton > button:hover {
-    transform: translateY(-1px); box-shadow: 0 8px 18px rgba(79, 70, 229, .35); color: #fff;
-}
-div[data-testid="stExpander"] {
-    background: #fff; border: 1px solid #e5e7f5 !important; border-radius: 14px;
-    box-shadow: 0 2px 8px rgba(30, 27, 75, .04);
-}
+    border: 3px solid #ff4b4b; }
+.chips { display: flex; flex-wrap: wrap; gap: .5rem; margin: .4rem 0 1rem 0; }
+.chip { background: #1a1c24; border: 1px solid #2d303c; padding: .3rem .85rem;
+    border-radius: 999px; font-size: .88rem; font-weight: 600; }
 </style>
 """
 
@@ -598,6 +577,7 @@ def email_to_html(email: str, photo: bytes = None, mime: str = "image/png") -> s
     return '<div class="email">' + "".join(parts) + "</div>"
 
 
+
 def section(number: int, icon: str, title: str) -> None:
     st.markdown(
         f'<div class="section-title"><span class="num">{number}</span>{icon} {title}</div>',
@@ -610,60 +590,68 @@ def card(title: str, items: list) -> None:
     st.markdown(f'<div class="card"><h4>{title}</h4><ul>{lis}</ul></div>', unsafe_allow_html=True)
 
 
-def main() -> None:
-    st.set_page_config(page_title="Employee Onboarding System", page_icon="🚀", layout="wide")
-    st.markdown(CSS, unsafe_allow_html=True)
-
-    st.markdown(
-        """
-        <div class="hero">
-            <h1>🚀 AI-Powered Employee Onboarding</h1>
-            <p>Enter a new hire's details and instantly get a welcome email, 7-day plan,
-            checklists, FAQs and training resources.</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    with st.form("onboarding_form"):
-        c1, c2 = st.columns(2)
-        with c1:
-            name = st.text_input("👤 Employee Name", placeholder="e.g., Jane Doe")
-            department = st.selectbox("🏢 Department", list(DEPARTMENT_IT_ACCESS.keys()))
-        with c2:
-            role = st.text_input("💼 Role", placeholder="e.g., Senior Software Engineer")
-            start = st.date_input("📅 Start Date", value=date.today())
-        photo_file = st.file_uploader(
-            "📸 Employee Photo (optional - shown in the welcome email)",
-            type=["png", "jpg", "jpeg"],
+def sidebar() -> None:
+    with st.sidebar:
+        st.markdown("### About")
+        st.write(
+            "This AI-Powered Employee Onboarding System helps streamline the "
+            "onboarding process by generating personalized onboarding packages."
         )
-        submitted = st.form_submit_button("✨ Generate Onboarding Package", use_container_width=True)
+        st.divider()
+        st.markdown("### Features")
+        for feature in FEATURES:
+            st.markdown(f"✅ {feature}")
+
+
+def main() -> None:
+    st.set_page_config(page_title="Employee Onboarding System", page_icon="👋", layout="wide")
+    st.markdown(CSS, unsafe_allow_html=True)
+    sidebar()
+
+    st.title("👋 AI-Powered Employee Onboarding System")
+    st.divider()
+
+    st.header("Employee Information")
+    with st.form("onboarding_form"):
+        c1, c2, c3 = st.columns(3)
+        name = c1.text_input("Employee Name", placeholder="e.g., Jane Doe")
+        role_choice = c2.selectbox("Role", ROLES)
+        department = c3.selectbox("Department", list(DEPARTMENT_IT_ACCESS.keys()))
+        with st.expander("Optional details"):
+            custom_role = st.text_input("Custom role (used when 'Other' is selected)")
+            start = st.date_input("Start Date", value=date.today())
+            photo_file = st.file_uploader(
+                "Employee Photo (shown in the welcome email)", type=["png", "jpg", "jpeg"]
+            )
+        submitted = st.form_submit_button(
+            "Generate Onboarding Package", type="primary", use_container_width=True
+        )
+    st.divider()
 
     if submitted:
-        if not name.strip() or not role.strip():
-            st.error("Please enter both the employee name and role.")
+        role = custom_role.strip() if role_choice.startswith("Other") else role_choice
+        if not name.strip() or not role:
+            st.error("Please enter the employee name and a role.")
             st.session_state.pop("package", None)
         else:
             photo = (photo_file.getvalue(), photo_file.type) if photo_file else None
-            st.session_state["package"] = (name.strip(), role.strip(), department, start, photo)
+            st.session_state["package"] = (name.strip(), role, department, start, photo)
 
     if "package" not in st.session_state:
-        st.info("👆 Fill in the form above to generate the onboarding package.")
+        st.info("Fill in the employee information above to generate the onboarding package.")
         return
 
     name, role, department, start, photo = st.session_state["package"]
     level = get_level(role)
 
+    st.success(f"Onboarding package generated for {name}")
     st.markdown(
         f"""
-        <div class="hero" style="padding:1.4rem 2rem; margin-top:1.4rem;">
-            <h1 style="font-size:1.7rem;">Onboarding package for {name}</h1>
-            <div class="chips">
-                <span class="chip">💼 {role}</span>
-                <span class="chip">🏢 {department}</span>
-                <span class="chip">🎯 {level.title()} level</span>
-                <span class="chip">📅 Starts {start.strftime('%b %d, %Y')}</span>
-            </div>
+        <div class="chips">
+            <span class="chip">💼 {role}</span>
+            <span class="chip">🏢 {department}</span>
+            <span class="chip">🎯 {level.title()} level</span>
+            <span class="chip">📅 Starts {start.strftime('%b %d, %Y')}</span>
         </div>
         """,
         unsafe_allow_html=True,
